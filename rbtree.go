@@ -51,44 +51,35 @@ func (n *rbTreeNode) rightRotate() {
 	l.right = n
 }
 
-type rbTree struct {
-	root *rbTreeNode
+func (n *rbTreeNode) nextNode() *rbTreeNode {
+	if n == nil || n.right == nil {
+		return nil
+	}
+	c := n.right
+	for c.left != nil {
+		c = c.left
+	}
+	return c
 }
 
-func (t *rbTree) Add(value int) {
-	if t.root == nil {
-		t.root = createRBTreeNode(value, 1)
-		return
-	}
-
-	p := t.findNode(value)
-	if p.value == value {
-		return
-	}
-	c := createRBTreeNode(value, 0)
-	c.parent = p
-	pp := p.parent
-	if c.value < p.value {
-		p.left = c
-	} else {
-		p.right = c
-	}
+func (n *rbTreeNode) up() {
+	var p, pp *rbTreeNode
 	for {
-		p = c.parent
+		p = n.parent
 		if p != nil {
 			pp = p.parent
 		} else {
 			pp = nil
 		}
 		if p == nil {
-			c.color = 1
+			n.color = 1
 			break
 		}
 		if p.color == 1 {
 			break
 		}
 		isPLeft := pp.left != nil && pp.left.value == p.value
-		isCLeft := p.left != nil && p.left.value == c.value
+		isCLeft := p.left != nil && p.left.value == n.value
 		s := pp.left
 		if isPLeft {
 			s = pp.right
@@ -98,7 +89,7 @@ func (t *rbTree) Add(value int) {
 			p.color = 1
 			s.color = 1
 			pp.color = 0
-			c = pp
+			n = pp
 		} else {
 			if isPLeft {
 				if !isCLeft {
@@ -120,11 +111,202 @@ func (t *rbTree) Add(value int) {
 	}
 }
 
-func (t *rbTree) Delete(value int) {
-	node := t.findNode(value)
-	if node.value == value {
+func (n *rbTreeNode) delete() {
+	if n.left != nil && n.right != nil {
+		next := n.nextNode()
+		n.value, next.value = next.value, n.value
+		next.delete()
+	} else if n.left != nil || n.right != nil {
+		// n has one child, n must be black, child must be red
+		c := n.left
+		if c == nil {
+			c = n.right
+		}
+		n.value, c.value = c.value, n.value
+		c.delete()
+	} else {
+		// n has no child
+		n.adjust()
+		n.drop()
+	}
+}
+
+func (n *rbTreeNode) adjust() {
+	for {
+		p := n.parent
+		if p == nil || n.color == 0 {
+			// n is root or n is red
+			n.color = 1
+			break
+		} else {
+			// n is not root and n is black, s must not be nil
+			isLeft := p.left != nil && p.left.value == n.value
+			s := p.left
+			sn, sf := s.left, s.right
+			if isLeft {
+				s = p.right
+				sn, sf = s.right, s.left
+			}
+
+			if s.color == 0 {
+				// s is red and s has two black child
+				s.color = 1
+				p.color = 0
+				if isLeft {
+					p.leftRotate()
+				} else {
+					p.rightRotate()
+				}
+			} else {
+				//s is black
+				if sn.isBlack() && sf.isBlack() {
+					s.color = 0
+				} else if sf.isBlack() && !sn.isBlack() {
+					s.color, sn.color = sn.color, s.color
+					if isLeft {
+						s.rightRotate()
+					} else {
+						s.leftRotate()
+					}
+				} else if !sf.isBlack() && sn.isBlack() {
+					s.color = p.color
+					p.color = 1
+					sf.color = 1
+					if isLeft {
+						p.leftRotate()
+					} else {
+						p.rightRotate()
+					}
+				}
+			}
+			n = n.parent
+		}
+	}
+	//
+	//isLeft := p.left != nil && p.left.value == n.value
+	//s := p.left
+	//if isLeft {
+	//	s = p.right
+	//}
+	//if n.color == 1 {
+	//	// if n is black, s can not be nil
+	//	// n has no child
+	//	if isLeft {
+	//		// s is red and s has two black child
+	//		if s.color == 0 {
+	//			s.color = 1
+	//			p.color = 0
+	//			p.leftRotate()
+	//		} else if s.color == 1 {
+	//			sl, sr := s.left, s.right
+	//			// s is black and has no child
+	//			if sl == nil && sr == nil {
+	//				s.color = 0
+	//				s.up()
+	//			} else if sl != nil && sr != nil {
+	//				// s has two red child
+	//				s.color = 0
+	//				sl.color = p.color
+	//				sr.color = 1
+	//				p.color = 1
+	//				s.rightRotate()
+	//				p.leftRotate()
+	//			} else {
+	//				if sl != nil {
+	//					s.rightRotate()
+	//					sl.color = p.color
+	//					p.color = 1
+	//				} else {
+	//					s.color = p.color
+	//					p.color = 1
+	//					sr.color = 1
+	//				}
+	//				p.leftRotate()
+	//			}
+	//		}
+	//	} else {
+	//		// s is red and s has two black child
+	//		if s.color == 0 {
+	//			s.color = 1
+	//			p.color = 0
+	//			p.rightRotate()
+	//		} else if s.color == 1 {
+	//			sl, sr := s.left, s.right
+	//			// s is black and has no child
+	//			if sl == nil && sr == nil {
+	//				s.color = 0
+	//				s.up()
+	//			} else if sl != nil && sr != nil {
+	//				// s has two red child
+	//				s.color = 0
+	//				sr.color = p.color
+	//				sl.color = 1
+	//				p.color = 1
+	//				s.leftRotate()
+	//				p.rightRotate()
+	//			} else {
+	//				if sr != nil {
+	//					s.leftRotate()
+	//					sr.color = p.color
+	//					p.color = 1
+	//				} else {
+	//					s.color = p.color
+	//					p.color = 1
+	//					sl.color = 1
+	//				}
+	//				p.rightRotate()
+	//			}
+	//		}
+	//	}
+	//}
+}
+
+func (n *rbTreeNode) isBlack() bool {
+	return n == nil || n.color == 1
+}
+
+func (n *rbTreeNode) drop() {
+	if n.parent != nil {
+		p := n.parent
+		isLeft := p.left != nil && p.left.value == n.value
+		if isLeft {
+			p.left = nil
+		} else {
+			p.right = nil
+		}
+	}
+}
+
+type rbTree struct {
+	root *rbTreeNode
+}
+
+func (t *rbTree) Add(value int) {
+	if t.root == nil {
+		t.root = createRBTreeNode(value, 1)
 		return
 	}
+
+	p := t.findNode(value)
+	if p.value == value {
+		return
+	}
+	c := createRBTreeNode(value, 0)
+	c.parent = p
+	if c.value < p.value {
+		p.left = c
+	} else {
+		p.right = c
+	}
+	c.up()
+}
+
+func (t *rbTree) Delete(value int) {
+	node := t.findNode(value)
+	if node.value != value {
+		return
+	}
+	node.delete()
 }
 
 func (t *rbTree) Find(value int) *rbTreeNode {

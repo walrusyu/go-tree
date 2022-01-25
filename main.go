@@ -10,6 +10,7 @@ func main() {
 	tree.Add(90)
 	tree.Add(15)
 	tree.Add(8)
-	//tree.Add(6)
+	tree.Delete(10)
+	tree.Delete(15)
 	fmt.Printf("haha")
 }
