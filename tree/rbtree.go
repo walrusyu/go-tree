@@ -1,4 +1,4 @@
-package main
+package tree
 
 type rbTreeNode struct {
 	value int
@@ -182,83 +182,6 @@ func (n *rbTreeNode) adjust() {
 			n = n.parent
 		}
 	}
-	//
-	//isLeft := p.left != nil && p.left.value == n.value
-	//s := p.left
-	//if isLeft {
-	//	s = p.right
-	//}
-	//if n.color == 1 {
-	//	// if n is black, s can not be nil
-	//	// n has no child
-	//	if isLeft {
-	//		// s is red and s has two black child
-	//		if s.color == 0 {
-	//			s.color = 1
-	//			p.color = 0
-	//			p.leftRotate()
-	//		} else if s.color == 1 {
-	//			sl, sr := s.left, s.right
-	//			// s is black and has no child
-	//			if sl == nil && sr == nil {
-	//				s.color = 0
-	//				s.up()
-	//			} else if sl != nil && sr != nil {
-	//				// s has two red child
-	//				s.color = 0
-	//				sl.color = p.color
-	//				sr.color = 1
-	//				p.color = 1
-	//				s.rightRotate()
-	//				p.leftRotate()
-	//			} else {
-	//				if sl != nil {
-	//					s.rightRotate()
-	//					sl.color = p.color
-	//					p.color = 1
-	//				} else {
-	//					s.color = p.color
-	//					p.color = 1
-	//					sr.color = 1
-	//				}
-	//				p.leftRotate()
-	//			}
-	//		}
-	//	} else {
-	//		// s is red and s has two black child
-	//		if s.color == 0 {
-	//			s.color = 1
-	//			p.color = 0
-	//			p.rightRotate()
-	//		} else if s.color == 1 {
-	//			sl, sr := s.left, s.right
-	//			// s is black and has no child
-	//			if sl == nil && sr == nil {
-	//				s.color = 0
-	//				s.up()
-	//			} else if sl != nil && sr != nil {
-	//				// s has two red child
-	//				s.color = 0
-	//				sr.color = p.color
-	//				sl.color = 1
-	//				p.color = 1
-	//				s.leftRotate()
-	//				p.rightRotate()
-	//			} else {
-	//				if sr != nil {
-	//					s.leftRotate()
-	//					sr.color = p.color
-	//					p.color = 1
-	//				} else {
-	//					s.color = p.color
-	//					p.color = 1
-	//					sl.color = 1
-	//				}
-	//				p.rightRotate()
-	//			}
-	//		}
-	//	}
-	//}
 }
 
 func (n *rbTreeNode) isBlack() bool {
