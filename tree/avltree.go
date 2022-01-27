@@ -102,6 +102,68 @@ func (n *avlTreeNode) insert(value int) *avlTreeNode {
 	return n
 }
 
+func (n *avlTreeNode) delete(value int) *avlTreeNode {
+	if n == nil {
+		return nil
+	}
+	if n.value > value {
+		n.left = n.left.delete(value)
+	} else if n.value < value {
+		n.right = n.right.delete(value)
+	} else {
+		if n.left == nil && n.right == nil {
+			return nil
+		} else if n.right != nil {
+			next := n.next()
+			n.value = next.value
+			n.right = n.right.delete(next.value)
+		} else {
+			prev := n.prev()
+			n.value = prev.value
+			n.left = n.left.delete(prev.value)
+		}
+	}
+	if n.right.getHeight()-n.left.getHeight() >= 2 {
+		if n.right.right.getHeight() > n.right.left.getHeight() {
+			n = n.leftRotate()
+		} else {
+			n = n.rightLeftRotate()
+		}
+	} else if n.left.getHeight()-n.right.getHeight() >= 2 {
+		if n.left.left.getHeight() > n.left.right.getHeight() {
+			n = n.rightRotate()
+		} else {
+			n = n.leftRightRotate()
+		}
+	}
+	n.refreshHeight()
+	return n
+}
+
+func (n *avlTreeNode) prev() *avlTreeNode {
+	if n == nil {
+		return nil
+	}
+
+	n = n.left
+	for n.right != nil {
+		n = n.right
+	}
+	return n
+}
+
+func (n *avlTreeNode) next() *avlTreeNode {
+	if n == nil {
+		return nil
+	}
+
+	n = n.right
+	for n.left != nil {
+		n = n.left
+	}
+	return n
+}
+
 type avlTree struct {
 	root *avlTreeNode
 }
@@ -113,6 +175,10 @@ func (t *avlTree) Add(value int) {
 	}
 
 	t.root = t.root.insert(value)
+}
+
+func (t *avlTree) Delete(value int) {
+	t.root = t.root.delete(value)
 }
 
 func (t *avlTree) findNode(value int) *avlTreeNode {
